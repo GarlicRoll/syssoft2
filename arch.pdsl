@@ -1,0 +1,304 @@
+architecture Arch {
+
+    registers:
+        storage SP[16]; // Стековый указатель 
+        storage IP[16]; // Указатель на текущую инструкцию
+        storage BP[16]; // Указатель на базовый адрес фрейма стека
+        storage IN_PORT[8]; // Порт ввода 
+        storage OUT_PORT[8]; // Порт вывода 
+    memory:
+        range code [0x0000..0xFFFF] {
+            cell = 8;
+            endianess = big-endian;
+            granularity = 0;
+        }
+        range databank [0x0000..0xFFFF] {
+            cell = 8;
+            endianess = big-endian;
+            granularity = 0;
+        }
+        range constants [0x0000..0xFFFF] {
+            cell = 8;
+            endianess = big-endian;
+            granularity = 0;
+        }
+
+
+    instructions:
+        encode imm64 field = immediate [64];
+        encode imm16 field = immediate [16];
+
+        instruction push = { 0000 0000 0000 0001, imm64 as value } {
+            SP = SP - 8;
+            code:8[SP] = value;
+            IP = IP + 10;
+        };
+
+        instruction pop = { 0000 0000 0000 0010 } {
+            SP = SP + 8;
+            IP = IP + 2;
+        };
+
+        instruction load_bp = { 0000 0000 0000 0100, imm16 as shift } {
+            if (shift >> 15) == 1 then {
+//              без & 0x0FFFF: Error: Access out of addressable space range: 0x8ffc0 vs code[0x0..0x0ffff]
+                SP = SP - 8;
+                code:8[SP] = code:8[(BP + ((~shift + 1) + 1) * 8) & 0x0FFFF];
+                SP = SP - 8;
+                code:8[SP] = code:8[(BP + (~shift + 1) * 8) & 0x0FFFF];
+                IP = IP + 4;
+            } else {
+                SP = SP - 8;
+                code:8[SP] = code:8[BP - (shift * 8)];
+                SP = SP - 8;
+                code:8[SP] = code:8[BP - ((shift + 1) * 8)];
+                IP = IP + 4;
+            }
+        };
+
+        instruction save_bp = { 0000 0000 0000 0110, imm16 as shift } {
+            code:8[BP - ((shift + 1) * 8)] = code:8[SP];
+            SP = SP + 8;
+            code:8[BP - (shift * 8)] = code:8[SP];
+            SP = SP + 8;
+            IP = IP + 4;
+        };
+
+        instruction load_in = { 0000 0000 0000 1000 } {
+            SP = SP - 8;
+            code:8[SP] = 1;
+            SP = SP - 8;
+            code:8[SP] = IN_PORT;
+            IP = IP + 2;
+        };
+
+        instruction save_out = { 0000 0000 0000 1001 } {
+            OUT_PORT = code:8[SP];
+            SP = SP -16;
+            IP = IP + 2;
+        };
+
+        instruction sum = { 0000 0000 0001 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            let value = a + b;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+
+        instruction sub = { 0000 0000 0010 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            let value = a - b;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+
+        instruction mul = { 0000 0000 0011 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            let value = a * b;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+
+        instruction div = { 0000 0000 0100 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            let value = a / b;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+
+        instruction mod = { 0000 0000 0101 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            let value = a % b;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+
+        instruction op_and = { 0000 0000 0110 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            let value = a & b;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+
+        instruction op_or = { 0000 0000 0111 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            let value = a | b;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+
+        instruction lt = { 0000 0000 1000 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            if (a < b) then code:8[SP] = 1; else code:8[SP] = 0;
+            IP = IP + 2;
+        };
+
+        instruction lte = { 0000 0000 1001 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            if (a <= b) then code:8[SP] = 1; else code:8[SP] = 0;
+            IP = IP + 2;
+        };
+
+        instruction gt = { 0000 0000 1010 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            if (a > b) then code:8[SP] = 1; else code:8[SP] = 0;
+            IP = IP + 2;
+        };
+
+        instruction gte = { 0000 0000 1011 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            if (a >= b) then code:8[SP] = 1; else code:8[SP] = 0;
+            IP = IP + 2;
+        };
+
+        instruction eq = { 0000 0000 1100 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            if (a == b) then code:8[SP] = 1; else code:8[SP] = 0;
+            code:8[SP+8] = 1;
+            IP = IP + 2;
+        };
+
+        instruction neq = { 0000 0000 1101 0000 } {
+            let b = code:8[SP];
+            SP = SP + 8;
+            let bt = code:8[SP];
+            SP = SP + 8;
+            let a = code:8[SP];
+            let at = code:8[SP+8];
+            if (a != b) then code:8[SP] = 1; else code:8[SP] = 0;
+            code:8[SP+8] = 1;
+            IP = IP + 2;
+        };
+
+        instruction jz = { 0000 0001 0000 0000, imm64 as addr } {
+            if (code:8[SP] == 0) then IP = addr; else IP = IP + 10;
+            SP = SP + 16;
+        };
+
+        instruction jnz = { 0000 0010 0000 0000, imm64 as addr } {
+            if (code:8[SP] != 0) then IP = addr; else IP = IP + 10;
+            SP = SP + 16;
+        };
+
+        instruction jmp = { 0000 0011 0000 0000, imm64 as addr } {
+            IP = addr;
+        };
+
+        instruction call = { 0001 0000 0000 0000, imm64 as addr } {
+            SP = SP - 8;
+            code:8[SP] = BP;
+            SP = SP - 8;
+            code:8[SP] = IP + 10;
+            BP = SP;
+            IP = addr;
+        };
+
+        instruction ret = { 0010 0000 0000 0000, imm64 as arg_number } {
+            SP = BP;
+            IP = code:8[SP];
+            SP = SP + 8;
+            let oldbp = code:8[SP];
+            SP = SP + 8;
+            SP = SP + arg_number * 16;
+            SP = SP - 8;
+            BP = BP - 8;
+            code:8[SP] = code:8[BP];
+            SP = SP - 8;
+            BP = BP - 8;
+            code:8[SP] = code:8[BP];
+            BP = oldbp;
+        };
+
+        instruction hlt = { 1111 1111 1111 1111 } {};
+
+    mnemonics:
+        mnemonic PUSH for push(value) "{1}";
+        mnemonic POP for pop();
+        mnemonic LOAD_BP for load_bp(shift) "{1}";
+        mnemonic SAVE_BP for save_bp(shift) "{1}";
+        mnemonic LOAD_IN for load_in();
+        mnemonic SAVE_OUT for save_out();
+
+        mnemonic SUM for sum();
+        mnemonic SUB for sub();
+        mnemonic MUL for mul();
+        mnemonic DIV for div();
+        mnemonic MOD for mod();
+        mnemonic BIT_AND for op_and();
+        mnemonic OR for op_or();
+        mnemonic LT for lt();
+        mnemonic LTE for lte();
+        mnemonic GT for gt();
+        mnemonic GTE for gte();
+        mnemonic EQ for eq();
+        mnemonic NEQ for neq();
+
+        mnemonic JZ for jz(addr) "{1}";
+        mnemonic JNZ for jnz(addr) "{1}";
+        mnemonic JMP for jmp(addr) "{1}";
+
+        mnemonic CALL for call(addr) "{1}";
+        mnemonic RET for ret(arg_number) "{1}";
+
+        mnemonic HLT for hlt();
+}

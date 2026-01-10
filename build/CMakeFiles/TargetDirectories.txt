@@ -1,0 +1,3 @@
+/home/user/Reps/syssoft2/build/CMakeFiles/SYSSOFT.dir
+/home/user/Reps/syssoft2/build/CMakeFiles/edit_cache.dir
+/home/user/Reps/syssoft2/build/CMakeFiles/rebuild_cache.dir

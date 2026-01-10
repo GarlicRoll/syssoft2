@@ -1,0 +1,1 @@
+/usr/bin/cc -g CMakeFiles/SYSSOFT.dir/main.c.o CMakeFiles/SYSSOFT.dir/node.c.o CMakeFiles/SYSSOFT.dir/error.c.o CMakeFiles/SYSSOFT.dir/parser.tab.c.o CMakeFiles/SYSSOFT.dir/lex.yy.c.o CMakeFiles/SYSSOFT.dir/parser.c.o CMakeFiles/SYSSOFT.dir/cfg.c.o CMakeFiles/SYSSOFT.dir/listing.c.o -o SYSSOFT 

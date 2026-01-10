@@ -1,0 +1,162 @@
+function parse_number() as int
+    dim ch as int
+    dim num as int
+    
+    num = 0;
+    ch = input();
+    
+    num = ch - 48;
+    
+    while true
+        ch = input();
+        if ch >= 48 then
+            if ch <= 57 then
+                num = num * 10 + (ch - 48);
+            end if
+        else
+            break
+        end if
+    wend
+    
+    num;
+end function
+
+function parse_factor() as int
+    dim ch as int
+    dim result as int
+    
+    ch = input();
+    
+    if ch == 40 then  
+        result = parse_expression();
+        ch = input(); 
+        result;
+    else
+        if ch >= 48 then
+            if ch <= 57 then
+                result = ch - 48;
+
+                while true
+                    ch = input();
+                    if ch >= 48 then
+                        if ch <= 57 then
+                            result = result * 10 + (ch - 48);
+                        else
+                            break
+                        end if
+                    else
+                        break
+                    end if
+                wend
+            else
+                result = 0;
+            end if
+        else 
+            result = 0;
+        end if
+        
+        result;
+    end if
+end function
+
+function parse_term() as int
+    dim result as int
+    dim op as int
+    dim next_val as int
+    dim saved_char as int
+    result = parse_factor();
+    
+    while true
+        op = input();
+        
+        if op == 42 then 
+            next_val = parse_factor();
+            result = result * next_val;
+        else
+            if op == 47 then  
+                next_val = parse_factor();
+                result = result / next_val;
+            else
+                saved_char = op;
+                break
+            end if
+        end if
+    wend
+    
+    result;
+end function
+
+function parse_expression() as int
+    dim result as int
+    dim op as int
+    dim next_val as int
+    
+    result = parse_term();
+    
+    while true
+        op = input();
+        
+        if op == 43 then 
+            next_val = parse_term();
+            result = result + next_val;
+        else
+            if op == 45 then 
+                next_val = parse_term();
+                result = result - next_val;
+            else
+                if op == 13 then  
+                    input();
+                    break
+                else
+                    break
+                end if
+            end if
+        end if
+    wend
+    
+    result;
+end function
+
+function number_length(num as int) as int
+    dim rest as int
+    dim count as int
+    count = 1;
+    rest = num/10;
+    while rest != 0
+        rest = rest/10;
+        count = count + 1;
+    wend
+    count;
+end function
+
+function print_num(num as int) as int
+    dim rest as int
+    dim count as int
+    dim shift as int
+    rest = num;
+    count = number_length(num) - 1;
+    shift = 1;
+    while count != 0
+        shift = shift * 10;
+        count = count - 1;
+    wend
+    while shift != 0
+        output(rest / shift + 48);
+        rest = rest % shift;
+        shift = shift / 10;
+    wend
+    output(10);
+    output(13);
+    0;
+end function
+
+function main()
+    dim result as int
+    
+    while true
+        result = parse_expression();
+        print_num(result);
+    wend
+    
+    0;
+end function

@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug SYSSOFT",
+            "type": "cppdbg",
+            "request": "launch",
+
+            "program": "${workspaceFolder}/build/SYSSOFT",
+
+            "args": [
+                "../output/",
+                "../input/input2.txt"
+            ],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+
+            "environment": [
+                { "name": "LD_LIBRARY_PATH", "value": "${workspaceFolder}" }
+            ],
+
+            "externalConsole": false,
+            "preLaunchTask": "build debug"
+        }
+    ]
+}
