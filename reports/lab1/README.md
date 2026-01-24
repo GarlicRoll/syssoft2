@@ -1,5 +1,14 @@
 Lab1
 
+Запуск (ubuntu / wsl):
+```
+mkdir cd build
+cmake ..
+make
+mkdir ../output
+./SYSSOFT ../output ../input/calc.txt
+```
+
 <img width="795" height="1123" alt="file-001" src="https://github.com/user-attachments/assets/d512d199-0947-4a08-ac54-1e1f3aa750a4" />
 <img width="795" height="1123" alt="file-002" src="https://github.com/user-attachments/assets/48e76aa5-b434-4e16-9d1b-dc65e02e6ecc" />
 <img width="795" height="1123" alt="file-003" src="https://github.com/user-attachments/assets/08235a60-21ea-4899-87a8-f68bbc3ff205" />
@@ -14,3 +23,4 @@ Lab1
 <img width="795" height="1123" alt="file-012" src="https://github.com/user-attachments/assets/805686ca-0e00-408b-a5d6-fa2a26ebf0d9" />
 <img width="795" height="1123" alt="file-013" src="https://github.com/user-attachments/assets/36aeeb65-b6d1-432c-8962-87b0445d612b" />
 <img width="795" height="1123" alt="file-014" src="https://github.com/user-attachments/assets/d98d5846-5609-4bb2-aa55-0df09d0f355c" />
+
