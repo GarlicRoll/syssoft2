@@ -1,0 +1,9 @@
+function main()
+    
+    while true
+        print(65);
+        print(66);
+    wend
+    
+    0;
+end function

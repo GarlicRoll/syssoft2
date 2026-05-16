@@ -34,7 +34,7 @@ def main():
         "AssembleDebug",
         "-w",
         f"sourcesDir={src_dir_win}",
-        f"asmListing={asm_win}",
+        f"asmListing={asm_win},../listings/input.osm,../listings/output.osm",
         f"definitionFile={def_win}",
         f"archName={ARCH_NAME}",
     ]

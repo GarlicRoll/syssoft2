@@ -1,0 +1,25 @@
+
+function t1(arg as int) as int
+    while 1
+        print(111);
+    wend
+end function
+
+function t2(arg as int) as int
+    while 1
+        print(222);
+    wend
+end function
+
+function main() as int
+    dim schedCfgOk as int
+    dim t1 as int
+    dim t2 as int
+    threadingInit();
+    schedCfgOk = setThreadQuantumOps(1);
+    setupSchedulerInterrupts();
+    spawnThread(0, t1);
+    spawnThread(1, t2);
+
+    startThreadScheduler();
+end function

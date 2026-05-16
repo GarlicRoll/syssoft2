@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VmDevicesConfiguration xmlns="Portable.TargetPlatform.Vm.Devices">
+  <Device Id="1" DeviceType="SimplePic">
+    <IoPortMap Id="0" PortType="state" BankName="ram" Mode="RAM">
+      <InitialBinding StartAddress="0x10100" Length="0x40" />
+    </IoPortMap>
+    <IoPortMap Id="1" PortType="handlers-map" BankName="ram" Mode="RAM">
+      <RelativeBinding BaseOfType="state" Offset="0x40" Length="0x100" />
+    </IoPortMap>
+    <Parameter Name="HandlersTableEntrySize" Value="4" />
+  </Device>
+
+  <Device Id="2" DeviceType="SimpleClock">
+    <IoPortMap Id="0" PortType="state" BankName="ram" Mode="RAM">
+      <InitialBinding StartAddress="0x13000" Length="0x48" />
+    </IoPortMap>
+    <Signal Id="0" Name="on-ticks" Interrupt="0" />
+  </Device>
+
+  <Device Id="3" DeviceType="SimplePipe">
+    <IoPortMap Id="0" PortType="control" BankName="ram" Mode="RAM">
+      <InitialBinding StartAddress="0x20000" Length="0x40" />
+    </IoPortMap>
+    <Parameter Name="PipeSpec" Value="stdio" />
+    <Parameter Name="OperationMode" Value="ByteStream" />
+  </Device>
+</VmDevicesConfiguration>

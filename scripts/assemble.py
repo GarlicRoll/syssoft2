@@ -7,7 +7,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent
 
-DEF_FILE = Path(os.environ.get("DEF_FILE", ROOT / "arch" / "arch.pdsl"))
+DEF_FILE = Path(os.environ.get("DEF_FILE", ROOT / "arch.pdsl"))
 ARCH_NAME = os.environ.get("ARCH_NAME", "Arch")
 
 
