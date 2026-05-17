@@ -1,0 +1,7 @@
+function testoutput(num as int)
+    output(num);
+end function
+
+function main()
+    testoutput
+end function

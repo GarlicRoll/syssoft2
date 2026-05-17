@@ -1,0 +1,1074 @@
+; scheduler runtime helpers + generated scheduling core
+; memory helpers
+
+mem_load:
+PUSH 0
+PUSH 0
+LOAD_BP -2
+LOAD64
+SAVE_BP 1
+RET 1
+
+mem_store:
+PUSH 0
+PUSH 0
+LOAD_BP -4
+LOAD_BP -2
+SWAP
+DROP
+STORE64
+DROP
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 2
+
+arr_get:
+PUSH 0
+PUSH 0
+LOAD_BP -2
+PUSH 1
+PUSH 8
+MUL
+LOAD_BP -4
+SUM
+LOAD64
+SAVE_BP 1
+RET 2
+
+arr_set:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+LOAD_BP -6
+LOAD_BP -4
+PUSH 1
+PUSH 8
+MUL
+SUM
+SAVE_BP 3
+LOAD_BP -2
+LOAD_BP 3
+CALL mem_store
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 3
+
+cmp_lt:
+PUSH 0
+PUSH 0
+LOAD_BP -4
+LOAD_BP -2
+LT
+SAVE_BP 1
+RET 2
+
+cmp_lte:
+PUSH 0
+PUSH 0
+LOAD_BP -4
+LOAD_BP -2
+LTE
+SAVE_BP 1
+RET 2
+
+cmp_gt:
+PUSH 0
+PUSH 0
+LOAD_BP -4
+LOAD_BP -2
+GT
+SAVE_BP 1
+RET 2
+
+number_length:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 1
+SAVE_BP 5
+LOAD_BP -2
+PUSH 1
+PUSH 10
+DIV
+SAVE_BP 3
+number_length_loop:
+LOAD_BP 3
+PUSH 1
+PUSH 0
+NEQ
+JNZ number_length_body
+LOAD_BP 5
+SAVE_BP 1
+RET 1
+number_length_body:
+LOAD_BP 3
+PUSH 1
+PUSH 10
+DIV
+SAVE_BP 3
+LOAD_BP 5
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 5
+JMP number_length_loop
+
+print_num:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+LOAD_BP -2
+SAVE_BP 3
+LOAD_BP -2
+CALL number_length
+PUSH 1
+PUSH 1
+SUB
+SAVE_BP 5
+PUSH 1
+PUSH 1
+SAVE_BP 7
+print_num_build_shift_loop:
+LOAD_BP 5
+PUSH 1
+PUSH 0
+NEQ
+JNZ print_num_build_shift_body
+print_num_emit_loop:
+LOAD_BP 7
+PUSH 1
+PUSH 0
+NEQ
+JNZ print_num_emit_body
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 1
+print_num_emit_body:
+LOAD_BP 3
+LOAD_BP 7
+DIV
+PUSH 1
+PUSH 48
+SUM
+CALL print
+LOAD_BP 3
+LOAD_BP 7
+MOD
+SAVE_BP 3
+LOAD_BP 7
+PUSH 1
+PUSH 10
+DIV
+SAVE_BP 7
+JMP print_num_emit_loop
+print_num_build_shift_body:
+LOAD_BP 7
+PUSH 1
+PUSH 10
+MUL
+SAVE_BP 7
+LOAD_BP 5
+PUSH 1
+PUSH 1
+SUB
+SAVE_BP 5
+JMP print_num_build_shift_loop
+
+print_preferred:
+PUSH 0
+PUSH 0
+LOAD_BP -4
+LOAD_BP -2
+GT
+JNZ print_preferred_srt
+PUSH 1
+PUSH 82
+CALL print
+PUSH 1
+PUSH 82
+CALL print
+PUSH 1
+PUSH 50
+CALL print
+JMP print_preferred_done
+print_preferred_srt:
+PUSH 1
+PUSH 83
+CALL print
+PUSH 1
+PUSH 82
+CALL print
+PUSH 1
+PUSH 84
+CALL print
+print_preferred_done:
+PUSH 1
+PUSH 10
+CALL print
+PUSH 1
+PUSH 13
+CALL print
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 2
+scheduler_begin:
+PUSH 0
+PUSH 0
+LOAD_BP -4
+PUSH 1
+PUSH 57344
+CALL mem_store
+LOAD_BP -2
+PUSH 1
+PUSH 57352
+CALL mem_store
+PUSH 1
+PUSH 0
+PUSH 1
+PUSH 57360
+CALL mem_store
+PUSH 1
+PUSH 0
+PUSH 1
+PUSH 57368
+CALL mem_store
+PUSH 1
+PUSH 0
+PUSH 1
+PUSH 57376
+CALL mem_store
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 2
+scheduler_add_process:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57360
+CALL mem_load
+SAVE_BP 3
+PUSH 1
+PUSH 57856
+LOAD_BP 3
+LOAD_BP -4
+CALL arr_set
+PUSH 1
+PUSH 58112
+LOAD_BP 3
+LOAD_BP -2
+CALL arr_set
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+PUSH 1
+PUSH 57360
+CALL mem_store
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 2
+init_process_state:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57360
+CALL mem_load
+SAVE_BP 5
+PUSH 1
+PUSH 0
+SAVE_BP 3
+sched_label2:
+LOAD_BP 3
+LOAD_BP 5
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ sched_label1
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 0
+sched_label1:
+PUSH 1
+PUSH 58368
+LOAD_BP 3
+PUSH 1
+PUSH 58112
+LOAD_BP 3
+CALL arr_get
+CALL arr_set
+PUSH 1
+PUSH 58624
+LOAD_BP 3
+PUSH 1
+PUSH 0
+CALL arr_set
+PUSH 1
+PUSH 58880
+LOAD_BP 3
+PUSH 1
+PUSH 0
+CALL arr_set
+PUSH 1
+PUSH 59136
+LOAD_BP 3
+PUSH 1
+PUSH 0
+CALL arr_set
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 3
+JMP sched_label2
+rr_enqueue:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57440
+CALL mem_load
+SAVE_BP 3
+PUSH 1
+PUSH 59392
+LOAD_BP 3
+LOAD_BP -2
+CALL arr_set
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 3
+LOAD_BP 3
+PUSH 1
+PUSH 64
+EQ
+JNZ sched_label3
+sched_label4:
+LOAD_BP 3
+PUSH 1
+PUSH 57440
+CALL mem_store
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 1
+sched_label3:
+PUSH 1
+PUSH 0
+SAVE_BP 3
+JMP sched_label4
+rr_queue_empty:
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57432
+CALL mem_load
+PUSH 1
+PUSH 57440
+CALL mem_load
+EQ
+JNZ sched_label5
+PUSH 1
+PUSH 0
+sched_label6:
+SAVE_BP 1
+RET 0
+sched_label5:
+PUSH 1
+PUSH 1
+JMP sched_label6
+rr_dequeue:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57432
+CALL mem_load
+SAVE_BP 3
+PUSH 1
+PUSH 59392
+LOAD_BP 3
+CALL arr_get
+SAVE_BP 5
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 3
+LOAD_BP 3
+PUSH 1
+PUSH 64
+EQ
+JNZ sched_label7
+sched_label8:
+LOAD_BP 3
+PUSH 1
+PUSH 57432
+CALL mem_store
+LOAD_BP 5
+SAVE_BP 1
+RET 0
+sched_label7:
+PUSH 1
+PUSH 0
+SAVE_BP 3
+JMP sched_label8
+admit_arrivals:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57360
+CALL mem_load
+SAVE_BP 5
+PUSH 1
+PUSH 0
+SAVE_BP 3
+sched_label10:
+LOAD_BP 3
+LOAD_BP 5
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ sched_label9
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 1
+sched_label9:
+PUSH 1
+PUSH 59136
+LOAD_BP 3
+CALL arr_get
+PUSH 1
+PUSH 0
+EQ
+JNZ sched_label11
+sched_label12:
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 3
+JMP sched_label10
+sched_label11:
+PUSH 1
+PUSH 58880
+LOAD_BP 3
+CALL arr_get
+PUSH 1
+PUSH 0
+EQ
+JNZ sched_label13
+JMP sched_label12
+sched_label13:
+PUSH 1
+PUSH 57856
+LOAD_BP 3
+CALL arr_get
+LOAD_BP -2
+CALL cmp_lte
+PUSH 1
+PUSH 1
+EQ
+JNZ sched_label14
+JMP sched_label12
+sched_label14:
+LOAD_BP 3
+CALL rr_enqueue
+PUSH 1
+PUSH 58880
+LOAD_BP 3
+PUSH 1
+PUSH 1
+CALL arr_set
+JMP sched_label12
+
+run_rr:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+CALL init_process_state
+PUSH 1
+PUSH 0
+SAVE_BP 3
+PUSH 1
+PUSH 0
+SAVE_BP 5
+PUSH 1
+PUSH 57360
+CALL mem_load
+SAVE_BP 7
+PUSH 1
+PUSH 0
+SAVE_BP 9
+PUSH 1
+PUSH 57352
+CALL mem_load
+SAVE_BP 11
+LOAD_BP 11
+PUSH 1
+PUSH 0
+EQ
+JNZ rr2_label14
+rr2_label15:
+rr2_label2:
+LOAD_BP 5
+LOAD_BP 7
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ rr2_label1
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 0
+rr2_label1:
+PUSH 1
+PUSH 0
+SAVE_BP 13
+PUSH 1
+PUSH 0
+SAVE_BP 15
+rr2_label10:
+LOAD_BP 15
+LOAD_BP 7
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ rr2_label9
+LOAD_BP 13
+PUSH 1
+PUSH 0
+EQ
+JNZ rr2_label8
+PUSH 1
+PUSH 58368
+LOAD_BP 9
+CALL arr_get
+SAVE_BP 19
+LOAD_BP 11
+SAVE_BP 21
+LOAD_BP 19
+LOAD_BP 21
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ rr2_label6
+rr2_label7:
+LOAD_BP 19
+LOAD_BP 21
+SUB
+SAVE_BP 19
+PUSH 1
+PUSH 58368
+LOAD_BP 9
+LOAD_BP 19
+CALL arr_set
+LOAD_BP 3
+LOAD_BP 21
+SUM
+SAVE_BP 3
+LOAD_BP 19
+PUSH 1
+PUSH 0
+EQ
+JNZ rr2_label4
+rr2_label5:
+LOAD_BP 9
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 9
+LOAD_BP 9
+LOAD_BP 7
+EQ
+JNZ rr2_label3
+JMP rr2_label2
+rr2_label3:
+PUSH 1
+PUSH 0
+SAVE_BP 9
+JMP rr2_label2
+rr2_label4:
+PUSH 1
+PUSH 58624
+LOAD_BP 9
+LOAD_BP 3
+CALL arr_set
+PUSH 1
+PUSH 59136
+LOAD_BP 9
+PUSH 1
+PUSH 1
+CALL arr_set
+LOAD_BP 5
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 5
+JMP rr2_label5
+rr2_label6:
+LOAD_BP 19
+SAVE_BP 21
+JMP rr2_label7
+rr2_label8:
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 3
+JMP rr2_label2
+rr2_label9:
+LOAD_BP 9
+LOAD_BP 15
+SUM
+LOAD_BP 7
+MOD
+SAVE_BP 17
+PUSH 1
+PUSH 59136
+LOAD_BP 17
+CALL arr_get
+PUSH 1
+PUSH 0
+EQ
+JNZ rr2_label11
+rr2_label12:
+LOAD_BP 15
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 15
+JMP rr2_label10
+rr2_label11:
+PUSH 1
+PUSH 57856
+LOAD_BP 17
+CALL arr_get
+LOAD_BP 3
+CALL cmp_lte
+PUSH 1
+PUSH 1
+EQ
+JNZ rr2_label13
+JMP rr2_label12
+rr2_label13:
+PUSH 1
+PUSH 1
+SAVE_BP 13
+LOAD_BP 17
+SAVE_BP 9
+LOAD_BP 7
+SAVE_BP 15
+JMP rr2_label12
+rr2_label14:
+PUSH 1
+PUSH 2
+SAVE_BP 11
+JMP rr2_label15
+
+run_srt:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+CALL init_process_state
+PUSH 1
+PUSH 0
+SAVE_BP 3
+PUSH 1
+PUSH 0
+SAVE_BP 5
+PUSH 1
+PUSH 57360
+CALL mem_load
+SAVE_BP 7
+sched_label26:
+LOAD_BP 5
+LOAD_BP 7
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ sched_label25
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 0
+sched_label25:
+PUSH 1
+PUSH 9999
+SAVE_BP 11
+PUSH 1
+PUSH 0
+SAVE_BP 13
+PUSH 1
+PUSH 0
+SAVE_BP 9
+sched_label30:
+LOAD_BP 9
+LOAD_BP 7
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ sched_label29
+LOAD_BP 11
+PUSH 1
+PUSH 9999
+EQ
+JNZ sched_label28
+PUSH 1
+PUSH 58368
+LOAD_BP 11
+CALL arr_get
+SAVE_BP 15
+LOAD_BP 15
+PUSH 1
+PUSH 0
+EQ
+JNZ srt_zero_remaining
+LOAD_BP 15
+PUSH 1
+PUSH 1
+SUB
+SAVE_BP 15
+PUSH 1
+PUSH 58368
+LOAD_BP 11
+LOAD_BP 15
+CALL arr_set
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 3
+LOAD_BP 15
+PUSH 1
+PUSH 0
+EQ
+JNZ sched_label27
+JMP sched_label26
+sched_label27:
+PUSH 1
+PUSH 58624
+LOAD_BP 11
+LOAD_BP 3
+CALL arr_set
+PUSH 1
+PUSH 59136
+LOAD_BP 11
+PUSH 1
+PUSH 1
+CALL arr_set
+LOAD_BP 5
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 5
+JMP sched_label26
+srt_zero_remaining:
+PUSH 1
+PUSH 58624
+LOAD_BP 11
+LOAD_BP 3
+CALL arr_set
+PUSH 1
+PUSH 59136
+LOAD_BP 11
+PUSH 1
+PUSH 1
+CALL arr_set
+LOAD_BP 5
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 5
+PUSH 1
+PUSH 9999
+SAVE_BP 11
+JMP sched_label26
+sched_label28:
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 3
+JMP sched_label26
+sched_label29:
+PUSH 1
+PUSH 59136
+LOAD_BP 9
+CALL arr_get
+PUSH 1
+PUSH 0
+EQ
+JNZ sched_label31
+sched_label32:
+LOAD_BP 9
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 9
+JMP sched_label30
+sched_label31:
+PUSH 1
+PUSH 57856
+LOAD_BP 9
+CALL arr_get
+LOAD_BP 3
+CALL cmp_lte
+PUSH 1
+PUSH 1
+EQ
+JNZ sched_label33
+JMP sched_label32
+sched_label33:
+PUSH 1
+PUSH 58368
+LOAD_BP 9
+CALL arr_get
+SAVE_BP 15
+LOAD_BP 15
+PUSH 1
+PUSH 0
+NEQ
+JNZ sched_label34
+JMP sched_label32
+sched_label34:
+LOAD_BP 11
+PUSH 1
+PUSH 9999
+EQ
+JNZ sched_label36
+LOAD_BP 15
+LOAD_BP 13
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ sched_label35
+JMP sched_label32
+sched_label35:
+LOAD_BP 9
+SAVE_BP 11
+LOAD_BP 15
+SAVE_BP 13
+JMP sched_label32
+sched_label36:
+LOAD_BP 9
+SAVE_BP 11
+LOAD_BP 15
+SAVE_BP 13
+JMP sched_label32
+compute_metrics:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57360
+CALL mem_load
+SAVE_BP 5
+PUSH 1
+PUSH 0
+SAVE_BP 3
+PUSH 1
+PUSH 0
+SAVE_BP 11
+PUSH 1
+PUSH 0
+SAVE_BP 13
+sched_label40:
+LOAD_BP 3
+LOAD_BP 5
+CALL cmp_lt
+PUSH 1
+PUSH 1
+EQ
+JNZ sched_label39
+LOAD_BP 5
+PUSH 1
+PUSH 0
+EQ
+JNZ sched_label37
+LOAD_BP 13
+PUSH 1
+PUSH 100
+MUL
+LOAD_BP 5
+DIV
+PUSH 1
+PUSH 57368
+CALL mem_store
+LOAD_BP 11
+PUSH 1
+PUSH 100
+MUL
+LOAD_BP 5
+DIV
+PUSH 1
+PUSH 57376
+CALL mem_store
+sched_label38:
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 0
+sched_label37:
+PUSH 1
+PUSH 0
+PUSH 1
+PUSH 57368
+CALL mem_store
+PUSH 1
+PUSH 0
+PUSH 1
+PUSH 57376
+CALL mem_store
+JMP sched_label38
+sched_label39:
+PUSH 1
+PUSH 58624
+LOAD_BP 3
+CALL arr_get
+PUSH 1
+PUSH 57856
+LOAD_BP 3
+CALL arr_get
+SUB
+SAVE_BP 7
+LOAD_BP 7
+PUSH 1
+PUSH 58112
+LOAD_BP 3
+CALL arr_get
+SUB
+SAVE_BP 9
+LOAD_BP 11
+LOAD_BP 7
+SUM
+SAVE_BP 11
+LOAD_BP 13
+LOAD_BP 9
+SUM
+SAVE_BP 13
+LOAD_BP 3
+PUSH 1
+PUSH 1
+SUM
+SAVE_BP 3
+JMP sched_label40
+scheduler_run:
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57344
+CALL mem_load
+PUSH 1
+PUSH 0
+EQ
+JNZ sched_dispatch_rr
+CALL run_srt
+JMP sched_dispatch_done
+sched_dispatch_rr:
+CALL run_rr
+sched_dispatch_done:
+CALL compute_metrics
+PUSH 1
+PUSH 0
+SAVE_BP 1
+RET 0
+scheduler_get_avg_wait_x100:
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57368
+CALL mem_load
+SAVE_BP 1
+RET 0
+scheduler_get_avg_turnaround_x100:
+PUSH 0
+PUSH 0
+PUSH 1
+PUSH 57376
+CALL mem_load
+SAVE_BP 1
+RET 0
