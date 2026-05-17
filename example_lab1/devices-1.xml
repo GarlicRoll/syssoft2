@@ -19,7 +19,7 @@
       <InitialBinding StartAddress="0xDC00" Length="0x0048" />
     </IoPortMap>
     <Signal Id="0" Name="on-cycles" Interrupt="0" />
-    <Parameter Name="CyclesSignalPeriod" Value="500" />
+    <Parameter Name="CyclesSignalPeriod" Value="1" />
   </Device>
 
   <Device DeviceType="SimplePipe" Name="StdIo" Id="3">
