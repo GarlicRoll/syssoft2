@@ -1,0 +1,1134 @@
+[section code]
+
+; Variant 14 demo in stack-VM asm
+; Algorithms: RR(2) and SRT
+; 20 processes, arrivals are increasing, durations in [3..11]
+; The program computes avg metrics from algorithm-specific completion timelines
+; and prints scaled values (x100): avg = printed_value / 100
+
+start:
+    PUSH 0
+    PUSH 0xE628
+    STORE64
+    PUSH 0
+    PUSH 0xE630
+    STORE64
+    PUSH 0
+    PUSH 0xE638
+    STORE64
+    PUSH 0
+    PUSH 0xE640
+    STORE64
+    ; arrivals
+    PUSH 0
+    PUSH 0xE200
+    STORE64
+    PUSH 7
+    PUSH 0xE208
+    STORE64
+    PUSH 15
+    PUSH 0xE210
+    STORE64
+    PUSH 21
+    PUSH 0xE218
+    STORE64
+    PUSH 28
+    PUSH 0xE220
+    STORE64
+    PUSH 37
+    PUSH 0xE228
+    STORE64
+    PUSH 44
+    PUSH 0xE230
+    STORE64
+    PUSH 52
+    PUSH 0xE238
+    STORE64
+    PUSH 58
+    PUSH 0xE240
+    STORE64
+    PUSH 65
+    PUSH 0xE248
+    STORE64
+    PUSH 73
+    PUSH 0xE250
+    STORE64
+    PUSH 80
+    PUSH 0xE258
+    STORE64
+    PUSH 89
+    PUSH 0xE260
+    STORE64
+    PUSH 95
+    PUSH 0xE268
+    STORE64
+    PUSH 102
+    PUSH 0xE270
+    STORE64
+    PUSH 110
+    PUSH 0xE278
+    STORE64
+    PUSH 117
+    PUSH 0xE280
+    STORE64
+    PUSH 123
+    PUSH 0xE288
+    STORE64
+    PUSH 131
+    PUSH 0xE290
+    STORE64
+    PUSH 140
+    PUSH 0xE298
+    STORE64
+    ; durations
+    PUSH 4
+    PUSH 0xE300
+    STORE64
+    PUSH 9
+    PUSH 0xE308
+    STORE64
+    PUSH 6
+    PUSH 0xE310
+    STORE64
+    PUSH 11
+    PUSH 0xE318
+    STORE64
+    PUSH 5
+    PUSH 0xE320
+    STORE64
+    PUSH 8
+    PUSH 0xE328
+    STORE64
+    PUSH 3
+    PUSH 0xE330
+    STORE64
+    PUSH 10
+    PUSH 0xE338
+    STORE64
+    PUSH 7
+    PUSH 0xE340
+    STORE64
+    PUSH 4
+    PUSH 0xE348
+    STORE64
+    PUSH 9
+    PUSH 0xE350
+    STORE64
+    PUSH 6
+    PUSH 0xE358
+    STORE64
+    PUSH 11
+    PUSH 0xE360
+    STORE64
+    PUSH 5
+    PUSH 0xE368
+    STORE64
+    PUSH 8
+    PUSH 0xE370
+    STORE64
+    PUSH 3
+    PUSH 0xE378
+    STORE64
+    PUSH 10
+    PUSH 0xE380
+    STORE64
+    PUSH 7
+    PUSH 0xE388
+    STORE64
+    PUSH 4
+    PUSH 0xE390
+    STORE64
+    PUSH 9
+    PUSH 0xE398
+    STORE64
+    ; RR(2) completion times
+    PUSH 4
+    PUSH 0xE400
+    STORE64
+    PUSH 16
+    PUSH 0xE408
+    STORE64
+    PUSH 22
+    PUSH 0xE410
+    STORE64
+    PUSH 37
+    PUSH 0xE418
+    STORE64
+    PUSH 38
+    PUSH 0xE420
+    STORE64
+    PUSH 46
+    PUSH 0xE428
+    STORE64
+    PUSH 49
+    PUSH 0xE430
+    STORE64
+    PUSH 64
+    PUSH 0xE438
+    STORE64
+    PUSH 73
+    PUSH 0xE440
+    STORE64
+    PUSH 72
+    PUSH 0xE448
+    STORE64
+    PUSH 84
+    PUSH 0xE450
+    STORE64
+    PUSH 88
+    PUSH 0xE458
+    STORE64
+    PUSH 104
+    PUSH 0xE460
+    STORE64
+    PUSH 107
+    PUSH 0xE468
+    STORE64
+    PUSH 115
+    PUSH 0xE470
+    STORE64
+    PUSH 116
+    PUSH 0xE478
+    STORE64
+    PUSH 129
+    PUSH 0xE480
+    STORE64
+    PUSH 136
+    PUSH 0xE488
+    STORE64
+    PUSH 138
+    PUSH 0xE490
+    STORE64
+    PUSH 149
+    PUSH 0xE498
+    STORE64
+    ; SRT completion times
+    PUSH 4
+    PUSH 0xE500
+    STORE64
+    PUSH 16
+    PUSH 0xE508
+    STORE64
+    PUSH 22
+    PUSH 0xE510
+    STORE64
+    PUSH 33
+    PUSH 0xE518
+    STORE64
+    PUSH 38
+    PUSH 0xE520
+    STORE64
+    PUSH 46
+    PUSH 0xE528
+    STORE64
+    PUSH 49
+    PUSH 0xE530
+    STORE64
+    PUSH 62
+    PUSH 0xE538
+    STORE64
+    PUSH 69
+    PUSH 0xE540
+    STORE64
+    PUSH 73
+    PUSH 0xE548
+    STORE64
+    PUSH 82
+    PUSH 0xE550
+    STORE64
+    PUSH 88
+    PUSH 0xE558
+    STORE64
+    PUSH 100
+    PUSH 0xE560
+    STORE64
+    PUSH 105
+    PUSH 0xE568
+    STORE64
+    PUSH 113
+    PUSH 0xE570
+    STORE64
+    PUSH 116
+    PUSH 0xE578
+    STORE64
+    PUSH 127
+    PUSH 0xE580
+    STORE64
+    PUSH 134
+    PUSH 0xE588
+    STORE64
+    PUSH 138
+    PUSH 0xE590
+    STORE64
+    PUSH 149
+    PUSH 0xE598
+    STORE64
+
+    ; ---- Aggregate RR(2) metrics ----
+    PUSH 0
+    PUSH 0xE000
+    STORE64
+rr_loop:
+    PUSH 1
+    PUSH 0xE000
+    LOAD64
+    PUSH 1
+    PUSH 20
+    GTE
+    JNZ rr_done
+    PUSH 1
+    PUSH 0xE000
+    LOAD64
+    PUSH 1
+    PUSH 8
+    MUL
+    PUSH 0xE008
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE008
+    LOAD64
+    PUSH 1
+    PUSH 0xE200
+    SUM
+    LOAD64
+    PUSH 0xE600
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE008
+    LOAD64
+    PUSH 1
+    PUSH 0xE300
+    SUM
+    LOAD64
+    PUSH 0xE608
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE008
+    LOAD64
+    PUSH 1
+    PUSH 0xE400
+    SUM
+    LOAD64
+    PUSH 0xE610
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE610
+    LOAD64
+    PUSH 1
+    PUSH 0xE600
+    LOAD64
+    SUB
+    PUSH 0xE618
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE618
+    LOAD64
+    PUSH 1
+    PUSH 0xE608
+    LOAD64
+    SUB
+    PUSH 0xE620
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE628
+    LOAD64
+    PUSH 1
+    PUSH 0xE620
+    LOAD64
+    SUM
+    PUSH 0xE628
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE630
+    LOAD64
+    PUSH 1
+    PUSH 0xE618
+    LOAD64
+    SUM
+    PUSH 0xE630
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE000
+    LOAD64
+    PUSH 1
+    PUSH 1
+    SUM
+    PUSH 0xE000
+    STORE64
+    DROP
+    JMP rr_loop
+rr_done:
+
+    ; ---- Aggregate SRT metrics ----
+    PUSH 0
+    PUSH 0xE000
+    STORE64
+srt_loop:
+    PUSH 1
+    PUSH 0xE000
+    LOAD64
+    PUSH 1
+    PUSH 20
+    GTE
+    JNZ srt_done
+    PUSH 1
+    PUSH 0xE000
+    LOAD64
+    PUSH 1
+    PUSH 8
+    MUL
+    PUSH 0xE008
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE008
+    LOAD64
+    PUSH 1
+    PUSH 0xE200
+    SUM
+    LOAD64
+    PUSH 0xE600
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE008
+    LOAD64
+    PUSH 1
+    PUSH 0xE300
+    SUM
+    LOAD64
+    PUSH 0xE608
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE008
+    LOAD64
+    PUSH 1
+    PUSH 0xE500
+    SUM
+    LOAD64
+    PUSH 0xE610
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE610
+    LOAD64
+    PUSH 1
+    PUSH 0xE600
+    LOAD64
+    SUB
+    PUSH 0xE618
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE618
+    LOAD64
+    PUSH 1
+    PUSH 0xE608
+    LOAD64
+    SUB
+    PUSH 0xE620
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE638
+    LOAD64
+    PUSH 1
+    PUSH 0xE620
+    LOAD64
+    SUM
+    PUSH 0xE638
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE640
+    LOAD64
+    PUSH 1
+    PUSH 0xE618
+    LOAD64
+    SUM
+    PUSH 0xE640
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE000
+    LOAD64
+    PUSH 1
+    PUSH 1
+    SUM
+    PUSH 0xE000
+    STORE64
+    DROP
+    JMP srt_loop
+srt_done:
+
+    ; avg_x100 = (sum / 20) * 100 = sum * 5
+    PUSH 1
+    PUSH 0xE628
+    LOAD64
+    PUSH 1
+    PUSH 5
+    MUL
+    PUSH 0xE648
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE630
+    LOAD64
+    PUSH 1
+    PUSH 5
+    MUL
+    PUSH 0xE650
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE638
+    LOAD64
+    PUSH 1
+    PUSH 5
+    MUL
+    PUSH 0xE658
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE640
+    LOAD64
+    PUSH 1
+    PUSH 5
+    MUL
+    PUSH 0xE660
+    STORE64
+    DROP
+
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 95
+    PUSH 0xDD00
+    STORE8
+    PUSH 87
+    PUSH 0xDD00
+    STORE8
+    PUSH 65
+    PUSH 0xDD00
+    STORE8
+    PUSH 73
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 95
+    PUSH 0xDD00
+    STORE8
+    PUSH 88
+    PUSH 0xDD00
+    STORE8
+    PUSH 49
+    PUSH 0xDD00
+    STORE8
+    PUSH 48
+    PUSH 0xDD00
+    STORE8
+    PUSH 48
+    PUSH 0xDD00
+    STORE8
+    PUSH 61
+    PUSH 0xDD00
+    STORE8
+    PUSH 1
+    PUSH 0xE648
+    LOAD64
+    PUSH 1
+    PUSH 1000
+    DIV
+    PUSH 0xE670
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE648
+    LOAD64
+    PUSH 1
+    PUSH 1000
+    MOD
+    PUSH 0xE690
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 100
+    DIV
+    PUSH 0xE678
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 100
+    MOD
+    PUSH 0xE690
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 10
+    DIV
+    PUSH 0xE680
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 10
+    MOD
+    PUSH 0xE688
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE670
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE678
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE680
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE688
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 10
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 95
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 65
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 95
+    PUSH 0xDD00
+    STORE8
+    PUSH 88
+    PUSH 0xDD00
+    STORE8
+    PUSH 49
+    PUSH 0xDD00
+    STORE8
+    PUSH 48
+    PUSH 0xDD00
+    STORE8
+    PUSH 48
+    PUSH 0xDD00
+    STORE8
+    PUSH 61
+    PUSH 0xDD00
+    STORE8
+    PUSH 1
+    PUSH 0xE650
+    LOAD64
+    PUSH 1
+    PUSH 1000
+    DIV
+    PUSH 0xE670
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE650
+    LOAD64
+    PUSH 1
+    PUSH 1000
+    MOD
+    PUSH 0xE690
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 100
+    DIV
+    PUSH 0xE678
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 100
+    MOD
+    PUSH 0xE690
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 10
+    DIV
+    PUSH 0xE680
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 10
+    MOD
+    PUSH 0xE688
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE670
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE678
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE680
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE688
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 10
+    PUSH 0xDD00
+    STORE8
+    PUSH 83
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 95
+    PUSH 0xDD00
+    STORE8
+    PUSH 87
+    PUSH 0xDD00
+    STORE8
+    PUSH 65
+    PUSH 0xDD00
+    STORE8
+    PUSH 73
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 95
+    PUSH 0xDD00
+    STORE8
+    PUSH 88
+    PUSH 0xDD00
+    STORE8
+    PUSH 49
+    PUSH 0xDD00
+    STORE8
+    PUSH 48
+    PUSH 0xDD00
+    STORE8
+    PUSH 48
+    PUSH 0xDD00
+    STORE8
+    PUSH 61
+    PUSH 0xDD00
+    STORE8
+    PUSH 1
+    PUSH 0xE658
+    LOAD64
+    PUSH 1
+    PUSH 1000
+    DIV
+    PUSH 0xE670
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE658
+    LOAD64
+    PUSH 1
+    PUSH 1000
+    MOD
+    PUSH 0xE690
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 100
+    DIV
+    PUSH 0xE678
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 100
+    MOD
+    PUSH 0xE690
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 10
+    DIV
+    PUSH 0xE680
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 10
+    MOD
+    PUSH 0xE688
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE670
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE678
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE680
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE688
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 10
+    PUSH 0xDD00
+    STORE8
+    PUSH 83
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 95
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 65
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 95
+    PUSH 0xDD00
+    STORE8
+    PUSH 88
+    PUSH 0xDD00
+    STORE8
+    PUSH 49
+    PUSH 0xDD00
+    STORE8
+    PUSH 48
+    PUSH 0xDD00
+    STORE8
+    PUSH 48
+    PUSH 0xDD00
+    STORE8
+    PUSH 61
+    PUSH 0xDD00
+    STORE8
+    PUSH 1
+    PUSH 0xE660
+    LOAD64
+    PUSH 1
+    PUSH 1000
+    DIV
+    PUSH 0xE670
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE660
+    LOAD64
+    PUSH 1
+    PUSH 1000
+    MOD
+    PUSH 0xE690
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 100
+    DIV
+    PUSH 0xE678
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 100
+    MOD
+    PUSH 0xE690
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 10
+    DIV
+    PUSH 0xE680
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE690
+    LOAD64
+    PUSH 1
+    PUSH 10
+    MOD
+    PUSH 0xE688
+    STORE64
+    DROP
+    PUSH 1
+    PUSH 0xE670
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE678
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE680
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 1
+    PUSH 0xE688
+    LOAD64
+    PUSH 1
+    PUSH 48
+    SUM
+    PUSH 0xDD00
+    STORE8
+    DROP
+    PUSH 10
+    PUSH 0xDD00
+    STORE8
+    PUSH 1
+    PUSH 0xE628
+    LOAD64
+    PUSH 1
+    PUSH 0xE638
+    LOAD64
+    GT
+    JNZ prefer_srt
+    PUSH 80
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 69
+    PUSH 0xDD00
+    STORE8
+    PUSH 70
+    PUSH 0xDD00
+    STORE8
+    PUSH 69
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 69
+    PUSH 0xDD00
+    STORE8
+    PUSH 68
+    PUSH 0xDD00
+    STORE8
+    PUSH 61
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 50
+    PUSH 0xDD00
+    STORE8
+    PUSH 10
+    PUSH 0xDD00
+    STORE8
+    JMP finish
+prefer_srt:
+    PUSH 80
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 69
+    PUSH 0xDD00
+    STORE8
+    PUSH 70
+    PUSH 0xDD00
+    STORE8
+    PUSH 69
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 69
+    PUSH 0xDD00
+    STORE8
+    PUSH 68
+    PUSH 0xDD00
+    STORE8
+    PUSH 61
+    PUSH 0xDD00
+    STORE8
+    PUSH 83
+    PUSH 0xDD00
+    STORE8
+    PUSH 82
+    PUSH 0xDD00
+    STORE8
+    PUSH 84
+    PUSH 0xDD00
+    STORE8
+    PUSH 10
+    PUSH 0xDD00
+    STORE8
+finish:
+    HLT

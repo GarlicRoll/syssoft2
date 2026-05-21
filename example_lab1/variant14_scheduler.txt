@@ -1,0 +1,88 @@
+function fill_variant14_data_1() as int
+    scheduler_add_process(0, 4);
+    scheduler_add_process(7, 9);
+    scheduler_add_process(15, 6);
+    scheduler_add_process(21, 11);
+    scheduler_add_process(28, 5);
+    scheduler_add_process(37, 8);
+    scheduler_add_process(44, 3);
+    scheduler_add_process(52, 10);
+    scheduler_add_process(58, 7);
+    scheduler_add_process(65, 4);
+    0;
+end function
+
+function fill_variant14_data_2() as int
+    scheduler_add_process(73, 9);
+    scheduler_add_process(80, 6);
+    scheduler_add_process(89, 11);
+    scheduler_add_process(95, 5);
+    scheduler_add_process(102, 8);
+    scheduler_add_process(110, 3);
+    scheduler_add_process(117, 10);
+    scheduler_add_process(123, 7);
+    scheduler_add_process(131, 4);
+    scheduler_add_process(140, 9);
+    0;
+end function
+
+function fill_variant14_data() as int
+    fill_variant14_data_1();
+    fill_variant14_data_2();
+    0;
+end function
+
+function run_rr_wait() as int
+    scheduler_begin(0, 2);
+    fill_variant14_data();
+    scheduler_run();
+    scheduler_get_avg_wait_x100();
+end function
+
+function run_rr_turn() as int
+    scheduler_begin(0, 2);
+    fill_variant14_data();
+    scheduler_run();
+    scheduler_get_avg_turnaround_x100();
+end function
+
+function run_srt_wait() as int
+    scheduler_begin(1, 0);
+    fill_variant14_data();
+    scheduler_run();
+    scheduler_get_avg_wait_x100();
+end function
+
+function run_srt_turn() as int
+    scheduler_begin(1, 0);
+    fill_variant14_data();
+    scheduler_run();
+    scheduler_get_avg_turnaround_x100();
+end function
+
+function print_pair(a as int, b as int) as int
+    print_num(a);
+    print(32);
+    print_num(b);
+    print(10);
+    print(13);
+    0;
+end function
+
+function main() as int
+    dim rrWaitX100 as int
+    dim rrTurnX100 as int
+    dim srtWaitX100 as int
+    dim srtTurnX100 as int
+
+    rrWaitX100 = run_rr_wait();
+    rrTurnX100 = run_rr_turn();
+    srtWaitX100 = run_srt_wait();
+    srtTurnX100 = run_srt_turn();
+
+    print_pair(rrWaitX100, rrTurnX100);
+    print_pair(srtWaitX100, srtTurnX100);
+    print_preferred(rrWaitX100, srtWaitX100);
+
+    0;
+end function

@@ -1,0 +1,7 @@
+function func(val as int)
+end function
+function main()
+    dim value as int
+    print(value);
+    0;
+end function

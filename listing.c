@@ -217,23 +217,23 @@ void tryPrintOperationTreeNode(TreeNode *operationTree, FILE *listingFile, Array
         tryPrintOperationTreeNode(operationTree->childNodes[1], listingFile, valuePlaceAssociations, argumentNumber);
         fprintln("MOD", listingFile);
     } else if (!strcmp(operationType, "EXECUTE")) {
-        if (!strcmp(operationTree->childNodes[0]->value, "input")) {
-            fprintln("LOAD_IN", listingFile);
-        } else if (!strcmp(operationTree->childNodes[0]->value, "output")) {
-            tryPrintOperationTreeNode(
-                    operationTree->childNodes[1],
-                    listingFile,
-                    valuePlaceAssociations,
-                    argumentNumber
-            );
-            fprintln("SAVE_OUT", listingFile);
-        } else {
-            for (int i = 1; i < operationTree->childrenNumber; ++i) {
-                tryPrintOperationTreeNode(operationTree->childNodes[i], listingFile, valuePlaceAssociations,
-                                          argumentNumber);
-            }
-            fprintlnWithArg("CALL", operationTree->childNodes[0]->value, listingFile);
+        // if (!strcmp(operationTree->childNodes[0]->value, "input")) {
+        //     fprintln("LOAD_IN", listingFile);
+        // } else if (!strcmp(operationTree->childNodes[0]->value, "output")) {
+        //     tryPrintOperationTreeNode(
+        //             operationTree->childNodes[1],
+        //             listingFile,
+        //             valuePlaceAssociations,
+        //             argumentNumber
+        //     );
+        //     fprintln("SAVE_OUT", listingFile);
+        // } else {
+        for (int i = 1; i < operationTree->childrenNumber; ++i) {
+            tryPrintOperationTreeNode(operationTree->childNodes[i], listingFile, valuePlaceAssociations,
+                                        argumentNumber);
         }
+        fprintlnWithArg("CALL", operationTree->childNodes[0]->value, listingFile);
+        // }
     } else {
         fprintln("EXCEPTION", listingFile);
     }

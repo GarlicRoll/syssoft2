@@ -1,0 +1,56 @@
+[section code]
+
+CALL main
+POP
+HLT
+
+interrupt0:
+PUSH 8192
+LOAD8
+PUSH 0
+EQ
+JNZ label1
+
+PUSH 8192
+PUSH 1
+STORE8
+JMP threadB
+
+label1:
+PUSH 8192
+PUSH 0
+STORE8
+JMP threadA
+
+
+main:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+
+PUSH 8192
+PUSH 0
+STORE8
+
+JMP threadA
+
+
+threadA:
+PUSH 1
+PUSH 10
+PUSH 0
+PUSH 0
+SUM
+DROP
+JMP threadA
+
+
+threadB:
+PUSH 1
+PUSH 20
+PUSH 0
+PUSH 0
+SUM
+DROP
+JMP threadB

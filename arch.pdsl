@@ -41,7 +41,6 @@ architecture Arch {
 
         instruction load_bp = { 0000 0000 0000 0100, imm16 as shift } {
             if (shift >> 15) == 1 then {
-//              без & 0x0FFFF: Error: Access out of addressable space range: 0x8ffc0 vs code[0x0..0x0ffff]
                 SP = SP - 8;
                 code:8[SP] = code:8[(BP + ((~shift + 1) + 1) * 8) & 0x0FFFF];
                 SP = SP - 8;
@@ -72,6 +71,66 @@ architecture Arch {
             IP = IP + 2;
         };
 
+        instruction store8 = { 0011 0001 0001 0000 } {
+
+            let addr = code:8[SP];
+            SP = SP + 8;
+
+            let value = code:8[SP];
+            SP = SP + 8;
+
+            code:1[addr] = value;
+
+            IP = IP + 2;
+        };
+        instruction store32 = { 0011 0001 0010 0000 } {
+
+            let addr = code:8[SP];
+            SP = SP + 8;
+
+            let value = code:8[SP];
+            SP = SP + 8;
+
+            code:4[addr] = value;
+
+            IP = IP + 2;
+        };
+        instruction store64 = { 0011 0001 0011 0000 } {
+
+            let addr = code:8[SP];
+            SP = SP + 8;
+
+            let value = code:8[SP];
+            SP = SP + 8;
+
+            code:8[addr] = value;
+
+            IP = IP + 2;
+        };
+        instruction load8 = { 0011 0000 0001 0000 } {
+
+            let addr = code:8[SP];
+
+            code:8[SP] = code:1[addr];
+
+            IP = IP + 2;
+        };
+        instruction load32 = { 0011 0000 0010 0000 } {
+
+            let addr = code:8[SP];
+
+            code:8[SP] = code:4[addr];
+
+            IP = IP + 2;
+        };
+        instruction load64 = { 0011 0000 0011 0000 } {
+
+            let addr = code:8[SP];
+
+            code:8[SP] = code:8[addr];
+
+            IP = IP + 2;
+        };
         instruction save_out = { 0000 0000 0000 1001 } {
             OUT_PORT = code:8[SP];
             SP = SP -16;
@@ -268,6 +327,72 @@ architecture Arch {
             code:8[SP] = code:8[BP];
             BP = oldbp;
         };
+        instruction dup = { 0100 0000 0000 0001 } {
+            let value = code:8[SP];
+            SP = SP - 8;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+        instruction swap = { 0100 0000 0000 0010 } {
+            let a = code:8[SP];
+            let b = code:8[SP + 8];
+            code:8[SP] = b;
+            code:8[SP + 8] = a;
+            IP = IP + 2;
+        };
+        instruction drop = { 0100 0000 0000 0011 } {
+            SP = SP + 8;
+            IP = IP + 2;
+        };
+        instruction over = { 0100 0000 0000 0100 } {
+            let value = code:8[SP + 8];
+            SP = SP - 8;
+            code:8[SP] = value;
+            IP = IP + 2;
+        };
+
+        instruction rot = { 0100 0000 0001 0000 } {
+            let a = code:8[SP];
+            let b = code:8[SP + 8];
+            let c = code:8[SP + 16];
+            code:8[SP] = c;
+            code:8[SP + 8] = a;
+            code:8[SP + 16] = b;
+            IP = IP + 2;
+        };
+        instruction nip = { 0100 0000 0001 0001 } {
+            let top = code:8[SP];
+            SP = SP + 8;
+            code:8[SP] = top;
+            IP = IP + 2;
+        };
+        instruction tuck = { 0100 0000 0001 0010 } {
+            let a = code:8[SP];
+            let b = code:8[SP + 8];
+            SP = SP - 8;
+            code:8[SP] = a;
+            code:8[SP + 8] = b;
+            code:8[SP + 16] = a;
+            IP = IP + 2;
+        };
+        instruction pick = { 0100 0000 0010 0000, imm16 as index } {
+            let value = code:8[SP + (index * 8)];
+            SP = SP - 8;
+            code:8[SP] = value;
+            IP = IP + 4;
+        };
+        instruction load_local = { 0100 0000 0011 0000, imm16 as index } {
+            let value = code:8[BP - (index * 8)];
+            SP = SP - 8;
+            code:8[SP] = value;
+            IP = IP + 4;
+        };
+        instruction store_local = { 0100 0000 0011 0001, imm16 as index } {
+            let value = code:8[SP];
+            SP = SP + 8;
+            code:8[BP - (index * 8)] = value;
+            IP = IP + 4;
+        };
 
         instruction hlt = { 1111 1111 1111 1111 } {};
 
@@ -278,6 +403,28 @@ architecture Arch {
         mnemonic SAVE_BP for save_bp(shift) "{1}";
         mnemonic LOAD_IN for load_in();
         mnemonic SAVE_OUT for save_out();
+
+        mnemonic LOAD8 for load8();
+        mnemonic LOAD32 for load32();
+        mnemonic LOAD64 for load64();
+
+        mnemonic STORE8 for store8();
+        mnemonic STORE32 for store32();
+        mnemonic STORE64 for store64();
+
+        mnemonic DUP for dup();
+        mnemonic SWAP for swap();
+        mnemonic DROP for drop();
+        mnemonic OVER for over();
+
+        mnemonic ROT for rot();
+        mnemonic NIP for nip();
+        mnemonic TUCK for tuck();
+
+        mnemonic PICK for pick(index) "{1}";
+
+        mnemonic LOAD_LOCAL for load_local(index) "{1}";
+        mnemonic STORE_LOCAL for store_local(index) "{1}";
 
         mnemonic SUM for sum();
         mnemonic SUB for sub();

@@ -1,0 +1,495 @@
+architecture Arch {
+  registers:
+    /* Флаги - 3 бита (typeRef: bit[3]) */
+    storage FLAGS[3];
+    view zf = FLAGS[0];
+    view sf = FLAGS[1];
+    view cf = FLAGS[2];
+
+    /* Общего назначения (GPR) - 64-битные (typeRef: bit[64]) */
+    storage R0[64];
+    storage R1[64];
+    storage R2[64];
+    storage R3[64];
+    storage R4[64];
+    storage R5[64];
+    storage R6[64];
+    storage R7[64];
+
+    view r0 = R0;
+    view r1 = R1;
+    view r2 = R2;
+    view r3 = R3;
+    view r4 = R4;
+    view r5 = R5;
+    view r6 = R6;
+    view r7 = R7;
+    /* aliases for byte registers */
+    view rb = R6;
+    view wb = R7;
+
+    /* Специальные регистры - 64-битные (typeRef: bit[64]) */
+    storage SP[64];
+    storage BP[64];
+    storage IP[64];
+
+    view sp = SP;
+    view bp = BP;
+    view ip = IP;
+
+    /* Порт ввода-вывода и регистры для stdin/stdout */
+    storage PORT[16];    /* 16-битный порт (typeRef: bit[16]) */
+    storage STDIN[64];   /* 64-битный ввод (typeRef: bit[64]) */
+    storage STDOUT[64];  /* 64-битный вывод (typeRef: bit[64]) */
+
+    view port = PORT;
+    view stdin = STDIN;
+    view stdout = STDOUT;
+
+  memory:
+    /* Общая RAM: 64KB, 8-битные ячейки (typeRef: bit[8]) */
+    range ram [0x0000..0xffff] {
+      cell = 8;           /* typeRef: bit[8] */
+      endianess = little-endian;
+      granularity = 0;
+    }
+
+  instructions:
+    /* Кодирование полей с явными типами */
+
+    /* Регистр - 8 бит для кодирования (typeRef: bit[8]) */
+    encode reg8 field = register {
+      r0 = 00000000,
+      r1 = 00000001,
+      r2 = 00000010,
+      r3 = 00000011,
+      r4 = 00000100,
+      r5 = 00000101,
+      r6 = 00000110,
+      r7 = 00000111,
+      sp = 00001000,
+      bp = 00001001
+    };
+
+    /* 64-битное непосредственное значение (typeRef: bit[64]) */
+    encode imm64 field = immediate[64] data;
+
+    /* 16-битный адрес (typeRef: bit[16]) */
+    encode addr16 field = immediate[16] offset;
+
+    /* 16-битное непосредственное значение (typeRef: bit[16]) */
+    encode imm16 field = immediate[16] data;
+
+    /*
+     * Длины инструкций (в байтах):
+     *
+     * nop                 : 1
+     * ldc rd, imm64       : 10  (1 opcode + 1 reg8 + 8 imm64)
+     * mov_reg_reg         : 3   (1 + 1 + 1)
+     * mov_reg_mem_imm     : 4   (1 + 1 + 2)
+     * mov_mem_imm_reg     : 4   (1 + 2 + 1)
+     * mov_reg_mem_reg     : 3   (1 + 1 + 1)
+     * mov_mem_reg_reg     : 3   (1 + 1 + 1)
+     *
+     * add/sub/.../cmp     : 3   (1 + 1 + 1)
+     * bnot                : 2   (1 + 1)
+     *
+     * jmp/je/.../jge      : 3   (1 + 2)
+     *
+     * push/pop            : 2   (1 + 1)
+     * call                : 3   (1 + 2)
+     * ret                 : 1
+     *
+     * setport             : 3   (1 + 2)
+     * in/out              : 2   (1 + 1)
+     * hlt                 : 1
+     */
+
+    /* 0x00: nop - нет операций */
+    instruction nop = { 0000 0000 } {
+      ip = ip + 1;
+    };
+
+    /* 0x01: ldc rd, imm64 - загрузка 64-битной константы */
+    instruction ldc = { 0000 0001, reg8 as rd, imm64 as imm } {
+      rd = imm;
+      ip = ip + 10;
+    };
+
+    /* 0x02–0x06: mov инструкции с разными типами операндов */
+
+    /* mov rd, rs - регистр в регистр (bit[64] → bit[64]) */
+    instruction mov_reg_reg = { 0000 0010, reg8 as rd, reg8 as rs } {
+      rd = rs;
+      ip = ip + 3;
+    };
+
+    /* mov rd, [addr] - память в регистр (bit[8] × 8 → bit[64]) */
+    instruction mov_reg_mem_imm = { 0000 0011, reg8 as rd, addr16 as addr } {
+      let base = addr;
+      rd = (ram[base] & 0xff)
+         | ((ram[base + 1] & 0xff) << 8)
+         | ((ram[base + 2] & 0xff) << 16)
+         | ((ram[base + 3] & 0xff) << 24)
+         | ((ram[base + 4] & 0xff) << 32)
+         | ((ram[base + 5] & 0xff) << 40)
+         | ((ram[base + 6] & 0xff) << 48)
+         | ((ram[base + 7] & 0xff) << 56);
+      ip = ip + 4;
+    };
+
+    /* mov [addr], rs - регистр в память (bit[64] → bit[8] × 8) */
+    instruction mov_mem_imm_reg = { 0000 0100, addr16 as addr, reg8 as rs } {
+      let base = addr;
+      ram[base]     = rs & 0xff;
+      ram[base + 1] = (rs >> 8)  & 0xff;
+      ram[base + 2] = (rs >> 16) & 0xff;
+      ram[base + 3] = (rs >> 24) & 0xff;
+      ram[base + 4] = (rs >> 32) & 0xff;
+      ram[base + 5] = (rs >> 40) & 0xff;
+      ram[base + 6] = (rs >> 48) & 0xff;
+      ram[base + 7] = (rs >> 56) & 0xff;
+      ip = ip + 4;
+    };
+
+    /* mov rd, [rs] - косвенная загрузка (bit[64] → bit[64]) */
+    instruction mov_reg_mem_reg = { 0000 0101, reg8 as rd, reg8 as rs } {
+      let base = rs;
+      rd = (ram[base] & 0xff)
+         | ((ram[base + 1] & 0xff) << 8)
+         | ((ram[base + 2] & 0xff) << 16)
+         | ((ram[base + 3] & 0xff) << 24)
+         | ((ram[base + 4] & 0xff) << 32)
+         | ((ram[base + 5] & 0xff) << 40)
+         | ((ram[base + 6] & 0xff) << 48)
+         | ((ram[base + 7] & 0xff) << 56);
+      ip = ip + 3;
+    };
+
+    /* mov [rd], rs - косвенное сохранение (bit[64] → bit[64]) */
+    instruction mov_mem_reg_reg = { 0000 0110, reg8 as rd, reg8 as rs } {
+      let base = rd;
+      ram[base]     = rs & 0xff;
+      ram[base + 1] = (rs >> 8)  & 0xff;
+      ram[base + 2] = (rs >> 16) & 0xff;
+      ram[base + 3] = (rs >> 24) & 0xff;
+      ram[base + 4] = (rs >> 32) & 0xff;
+      ram[base + 5] = (rs >> 40) & 0xff;
+      ram[base + 6] = (rs >> 48) & 0xff;
+      ram[base + 7] = (rs >> 56) & 0xff;
+      ip = ip + 3;
+    };
+
+    /* 0x10–0x14: арифметика (64-битное целое, bit[64] операций) */
+
+    /* add rd, rs - сложение (bit[64] + bit[64] → bit[64]) */
+    instruction add = { 0001 0000, reg8 as rd, reg8 as rs } {
+      rd = rd + rs;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* sub rd, rs - вычитание (bit[64] - bit[64] → bit[64]) */
+    instruction sub = { 0001 0001, reg8 as rd, reg8 as rs } {
+      rd = rd - rs;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* mul rd, rs - умножение (bit[64] × bit[64] → bit[64]) */
+    instruction mul = { 0001 0010, reg8 as rd, reg8 as rs } {
+      rd = rd * rs;
+      rd = rd & 0xffffffffffffffff;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* div rd, rs - деление (bit[64] ÷ bit[64] → bit[64]) */
+    instruction div = { 0001 0011, reg8 as rd, reg8 as rs } {
+      rd = rd / rs;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* mod rd, rs - остаток от деления (bit[64] % bit[64] → bit[64]) */
+    instruction mod = { 0001 0100, reg8 as rd, reg8 as rs } {
+      rd = rd % rs;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* 0x20–0x25: битовые операции (bit[64] операций) */
+
+    /* band rd, rs - побитовое И (bit[64] & bit[64] → bit[64]) */
+    instruction band = { 0010 0000, reg8 as rd, reg8 as rs } {
+      rd = rd & rs;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* bor rd, rs - побитовое ИЛИ (bit[64] | bit[64] → bit[64]) */
+    instruction bor = { 0010 0001, reg8 as rd, reg8 as rs } {
+      rd = rd | rs;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* bxor rd, rs - побитовое исключающее ИЛИ (bit[64] ^ bit[64] → bit[64]) */
+    instruction bxor = { 0010 0010, reg8 as rd, reg8 as rs } {
+      rd = rd ^ rs;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* bnot rd - побитовое НЕ (~bit[64] → bit[64]) */
+    instruction bnot = { 0010 0011, reg8 as rd } {
+      rd = ~rd;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 2;
+    };
+
+    /* shl rd, rs - сдвиг влево (bit[64] << bit[64] → bit[64]) */
+    instruction shl = { 0010 0100, reg8 as rd, reg8 as rs } {
+      let shift = rs & 0x3f;
+      rd = rd << shift;
+      rd = rd & 0xffffffffffffffff;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* shr rd, rs - сдвиг вправо (bit[64] >> bit[64] → bit[64]) */
+    instruction shr = { 0010 0101, reg8 as rd, reg8 as rs } {
+      let shift = rs & 0x3f;
+      rd = rd >> shift;
+      zf = (rd == 0);
+      sf = (rd >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* 0x30: сравнение (bit[64] - bit[64] → флаги) */
+    instruction cmp = { 0011 0000, reg8 as rd, reg8 as rs } {
+      let temp = rd - rs;
+      zf = (temp == 0);
+      sf = (temp >> 63);
+      cf = 0;
+      ip = ip + 3;
+    };
+
+    /* 0x40–0x46: переходы по флагам (typeRef: переход по адресу bit[16]) */
+
+    /* jmp addr: безусловный переход */
+    instruction jmp = { 0100 0000, addr16 as addr } {
+      ip = addr;
+    };
+
+    /* je addr: переход если равно (zf=1) */
+    instruction je = { 0100 0001, addr16 as addr } {
+      if zf != 0 then
+        ip = addr;
+      else
+        ip = ip + 3;
+    };
+
+    /* jne addr: переход если не равно (zf=0) */
+    instruction jne = { 0100 0010, addr16 as addr } {
+      if zf == 0 then
+        ip = addr;
+      else
+        ip = ip + 3;
+    };
+
+    /* jl addr: переход если меньше (sf=1) */
+    instruction jl = { 0100 0011, addr16 as addr } {
+      if sf != 0 then
+        ip = addr;
+      else
+        ip = ip + 3;
+    };
+
+    /* jle addr: переход если меньше или равно (sf=1 или zf=1) */
+    instruction jle = { 0100 0100, addr16 as addr } {
+      if (sf != 0) || (zf != 0) then
+        ip = addr;
+      else
+        ip = ip + 3;
+    };
+
+    /* jg addr: переход если больше (sf=0 и zf=0) */
+    instruction jg = { 0100 0101, addr16 as addr } {
+      if (sf == 0) && (zf == 0) then
+        ip = addr;
+      else
+        ip = ip + 3;
+    };
+
+    /* jge addr: переход если больше или равно (sf=0) */
+    instruction jge = { 0100 0110, addr16 as addr } {
+      if sf == 0 then
+        ip = addr;
+      else
+        ip = ip + 3;
+    };
+
+    /* 0x50–0x53: стек и вызовы (64-битный стек, шаг 8 байт) */
+
+    /* push rs: сохранение в стек (bit[64] → memory) */
+    instruction push = { 0101 0000, reg8 as rs } {
+      sp = sp - 8;
+      ram[sp]     = rs & 0xff;
+      ram[sp + 1] = (rs >> 8)  & 0xff;
+      ram[sp + 2] = (rs >> 16) & 0xff;
+      ram[sp + 3] = (rs >> 24) & 0xff;
+      ram[sp + 4] = (rs >> 32) & 0xff;
+      ram[sp + 5] = (rs >> 40) & 0xff;
+      ram[sp + 6] = (rs >> 48) & 0xff;
+      ram[sp + 7] = (rs >> 56) & 0xff;
+      ip = ip + 2;
+    };
+
+    /* pop rd: восстановление из стека (memory → bit[64]) */
+    instruction pop = { 0101 0001, reg8 as rd } {
+      rd = (ram[sp] & 0xff)
+         | ((ram[sp + 1] & 0xff) << 8)
+         | ((ram[sp + 2] & 0xff) << 16)
+         | ((ram[sp + 3] & 0xff) << 24)
+         | ((ram[sp + 4] & 0xff) << 32)
+         | ((ram[sp + 5] & 0xff) << 40)
+         | ((ram[sp + 6] & 0xff) << 48)
+         | ((ram[sp + 7] & 0xff) << 56);
+      sp = sp + 8;
+      ip = ip + 2;
+    };
+
+    /* call addr: вызов подпрограммы (bit[16] → стек, ip → bit[16]) */
+    instruction call = { 0101 0010, addr16 as addr } {
+      let retaddr = ip + 3;
+      sp = sp - 8;
+      ram[sp]     = retaddr & 0xff;
+      ram[sp + 1] = (retaddr >> 8)  & 0xff;
+      ram[sp + 2] = (retaddr >> 16) & 0xff;
+      ram[sp + 3] = (retaddr >> 24) & 0xff;
+      ram[sp + 4] = (retaddr >> 32) & 0xff;
+      ram[sp + 5] = (retaddr >> 40) & 0xff;
+      ram[sp + 6] = (retaddr >> 48) & 0xff;
+      ram[sp + 7] = (retaddr >> 56) & 0xff;
+      ip = addr;
+    };
+
+    /* ret: возврат из подпрограммы (стек → bit[16]) */
+    instruction ret = { 0101 0011 } {
+      ip = (ram[sp] & 0xff)
+         | ((ram[sp + 1] & 0xff) << 8)
+         | ((ram[sp + 2] & 0xff) << 16)
+         | ((ram[sp + 3] & 0xff) << 24)
+         | ((ram[sp + 4] & 0xff) << 32)
+         | ((ram[sp + 5] & 0xff) << 40)
+         | ((ram[sp + 6] & 0xff) << 48)
+         | ((ram[sp + 7] & 0xff) << 56);
+      sp = sp + 8;
+    };
+
+    /* 0x60–0x62: ввод-вывод (через регистры PORT, STDIN, STDOUT) */
+
+    /* setport imm: установка номера порта (bit[16] → PORT) */
+    instruction setport = { 0110 0000, imm16 as imm } {
+      port = imm;
+      ip = ip + 3;
+    };
+
+    /* in rd: чтение из порта (STDIN → bit[64]) */
+    instruction in = { 0110 0001, reg8 as rd } {
+      rd = stdin;
+      ip = ip + 2;
+    };
+
+    /* out rs: запись в порт (bit[64] → STDOUT) */
+    instruction out = { 0110 0010, reg8 as rs } {
+      stdout = rs;
+      ip = ip + 2;
+    };
+
+    /* 0xFF: останов процессора */
+    instruction hlt = { 1111 1111 } {
+      ip = ip + 1;
+    };
+
+  mnemonics:
+    /* Форматные строки */
+    format one    is "{1}";
+    format two    is "{1}, {2}";
+    format regmem is "{1}, [{2}]";
+    format memreg is "[{1}], {2}";
+
+    /* Без аргументов */
+    mnemonic nop();
+    mnemonic hlt();
+    mnemonic ret();
+
+    /* Загрузка константы */
+    mnemonic ldc for ldc(rd, imm) two;
+
+    /* Перемещения */
+    mnemonic mov
+      for mov_reg_reg(rd, rs) two,
+      for mov_reg_mem_imm(rd, addr) regmem,
+      for mov_mem_imm_reg(addr, rs) memreg,
+      for mov_reg_mem_reg(rd, rs) regmem,
+      for mov_mem_reg_reg(rd, rs) memreg;
+
+    /* Арифметика и логика */
+    mnemonic add  for add(rd, rs) two;
+    mnemonic sub  for sub(rd, rs) two;
+    mnemonic mul  for mul(rd, rs) two;
+    mnemonic div  for div(rd, rs) two;
+    mnemonic mod  for mod(rd, rs) two;
+
+    mnemonic band for band(rd, rs) two;
+    mnemonic bor  for bor(rd, rs) two;
+    mnemonic bxor for bxor(rd, rs) two;
+    mnemonic bnot for bnot(rd) one;
+    mnemonic shl  for shl(rd, rs) two;
+    mnemonic shr  for shr(rd, rs) two;
+
+    /* Сравнение */
+    mnemonic cmp for cmp(rd, rs) two;
+
+    /* Переходы */
+    mnemonic jmp for jmp(addr) one;
+    mnemonic je  for je(addr) one;
+    mnemonic jne for jne(addr) one;
+    mnemonic jl  for jl(addr) one;
+    mnemonic jle for jle(addr) one;
+    mnemonic jg  for jg(addr) one;
+    mnemonic jge for jge(addr) one;
+
+    /* Стек и вызовы */
+    mnemonic push for push(rs) one;
+    mnemonic pop  for pop(rd) one;
+    mnemonic call for call(addr) one;
+
+    /* Порт ввода-вывода */
+    mnemonic setport for setport(imm) one;
+    mnemonic in      for in(rd) one;
+    mnemonic out     for out(rs) one;
+}

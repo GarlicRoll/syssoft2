@@ -1,0 +1,7 @@
+output:
+PUSH 0
+PUSH 0
+LOAD_BP -2
+SAVE_OUT
+SAVE_BP 1
+RET 1

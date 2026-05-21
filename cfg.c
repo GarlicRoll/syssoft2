@@ -22,7 +22,6 @@ char *mallocString(char *text) {
     return pointer;
 }
 
-// добавление в массив с возможным динамическим расширением
 void addToList(Array *currentArray, void *element) {
     void **nodes;
     if (currentArray->size != currentArray->nextPosition) {
@@ -49,8 +48,6 @@ int getNextExecutionId() {
     return currentExecutionId;
 }
 
-// утилита для получения всех node дерева разбора в виде массива (вызвано
-// бинарной реализацией листов)
 Array findListItemsUtil(TreeNode *treeNode) {
     TreeNode **nodes = malloc(sizeof(TreeNode *) * START_ARRAY_SIZE);
     Array items = {START_ARRAY_SIZE, 0, nodes};
