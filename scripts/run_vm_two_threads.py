@@ -12,8 +12,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent
 
-ASM_FILE = ROOT / "example_lab1" / "vm_two_threads.asm"
-DEVICES_FILE = ROOT / "example_lab1" / "devices-1.xml"
+ASM_FILE = ROOT / "spo2_lab1" / "vm_two_threads.asm"
+DEVICES_FILE = ROOT / "spo2_lab1" / "devices-1.xml"
 BIN_FILE = SCRIPT_DIR / "output" / "remote_tasks" / "out.ptptb"
 
 
