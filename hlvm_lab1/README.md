@@ -42,7 +42,7 @@ mono hlvm_lab1/calc.exe
 ```bash
 ./build_local/HLVM_LAB1_CLR hlvm_lab1/fib.il input/fib.txt
 ilasm /exe /output:hlvm_lab1/fib.exe hlvm_lab1/fib.il
-printf '5\r\n-1\r\n' | mono hlvm_lab1/fib.exe
+mono hlvm_lab1/fib.exe
 ```
 
 Ожидаемый вывод: `3`.
