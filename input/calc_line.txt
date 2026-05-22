@@ -105,10 +105,13 @@ function parse_expression() as int
                 result = result - next_val;
             else
                 if op == 13 then  
-                    input();
                     break
                 else
-                    break
+                    if op == 10 then
+                        break
+                    else
+                        break
+                    end if
                 end if
             end if
         end if
