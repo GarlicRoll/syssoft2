@@ -1,0 +1,27 @@
+function main() as int
+    dim base as int
+    dim f as func(int) -> int
+    dim y as int
+
+    base = 2;
+
+    function addb(v as int) as int
+        v + base;
+    end function
+
+    function mulb(v as int) as int
+        v * base;
+    end function
+
+    f = addb;
+    y = f(5);
+    output(y + 48);
+
+    f = mulb;
+    y = f(4);
+    output(y + 48);
+
+    output(10);
+    output(13);
+    0;
+end function

@@ -1,0 +1,19 @@
+function main() as int
+    dim delta as int
+    dim f as func(int) -> int
+    dim x as int
+
+    delta = 4;
+
+    function addk(v as int) as int
+        v + delta;
+    end function
+
+    f = addk;
+    x = f(5);
+
+    output(x + 48);
+    output(10);
+    output(13);
+    0;
+end function

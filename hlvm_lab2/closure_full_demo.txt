@@ -1,0 +1,30 @@
+function main() as int
+    dim offset as int
+    dim combiner as func(int, int) -> int
+    dim result as int
+
+    offset = 3;
+
+    function add_with_offset(a as int, b as int) as int
+        a + b + offset;
+    end function
+
+    function sub_with_offset(a as int, b as int) as int
+        a - b + offset;
+    end function
+
+    combiner = add_with_offset;
+    result = combiner(2, 4);
+    output(result + 48);
+
+    combiner(1, 1);
+
+    offset = 1;
+    combiner = sub_with_offset;
+    result = combiner(9, 3);
+    output(result + 48);
+
+    output(10);
+    output(13);
+    0;
+end function
