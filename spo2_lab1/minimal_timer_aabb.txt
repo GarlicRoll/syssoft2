@@ -1,27 +1,27 @@
-
 function t1(arg as int) as int
     while 1
-        print(111);
-        threadInterruptPoint();
+        print(65);
     wend
 end function
 
 function t2(arg as int) as int
     while 1
-        print(222);
-        threadInterruptPoint();
+        print(66);
     wend
 end function
 
 function main() as int
-    dim schedCfgOk as int
-    dim tickCfgOk as int
+    dim qOpsOk as int
+    dim qTicksOk as int
+    dim timerOk as int
     dim t1 as int
     dim t2 as int
+
     threadingInit();
-    schedCfgOk = setThreadQuantumOps(1);
-    tickCfgOk = setThreadQuantumTicks(1);
-    setupSchedulerInterrupts();
+    qOpsOk = setThreadQuantumOps(1);
+    qTicksOk = setThreadQuantumTicks(2);
+    timerOk = setupEntropyTimer(1);
+
     spawnThread(0, t1);
     spawnThread(1, t2);
 

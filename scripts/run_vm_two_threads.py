@@ -12,8 +12,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent
 
-ASM_FILE = ROOT / "spo2_lab1" / "vm_two_threads.asm"
-DEVICES_FILE = ROOT / "spo2_lab1" / "devices-1.xml"
+DEFAULT_ASM_FILE = ROOT / "spo2_lab1" / "vm_two_threads.asm"
+DEFAULT_DEVICES_FILE = ROOT / "spo2_lab1" / "devices-1.xml"
 BIN_FILE = SCRIPT_DIR / "output" / "remote_tasks" / "out.ptptb"
 
 
@@ -69,6 +69,18 @@ def run_with_timeout(cmd: list[str], timeout_sec: int) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--asm-file",
+        type=Path,
+        default=DEFAULT_ASM_FILE,
+        help=f"ASM file to assemble and run (default: {DEFAULT_ASM_FILE}).",
+    )
+    parser.add_argument(
+        "--devices-file",
+        type=Path,
+        default=DEFAULT_DEVICES_FILE,
+        help=f"Devices XML to use (default: {DEFAULT_DEVICES_FILE}).",
+    )
+    parser.add_argument(
         "--execute-timeout",
         type=int,
         default=20,
@@ -76,14 +88,17 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if not ASM_FILE.is_file():
-        print(f"Error: asm file not found: {ASM_FILE}", file=sys.stderr)
+    asm_file = args.asm_file if args.asm_file.is_absolute() else (ROOT / args.asm_file)
+    devices_file = args.devices_file if args.devices_file.is_absolute() else (ROOT / args.devices_file)
+
+    if not asm_file.is_file():
+        print(f"Error: asm file not found: {asm_file}", file=sys.stderr)
         return 1
-    if not DEVICES_FILE.is_file():
-        print(f"Error: devices file not found: {DEVICES_FILE}", file=sys.stderr)
+    if not devices_file.is_file():
+        print(f"Error: devices file not found: {devices_file}", file=sys.stderr)
         return 1
 
-    assemble_cmd = [sys.executable, "assemble.py", str(ASM_FILE)]
+    assemble_cmd = [sys.executable, "assemble.py", str(asm_file)]
     assemble_proc = run_and_print(assemble_cmd)
     if assemble_proc.returncode != 0:
         return assemble_proc.returncode
@@ -103,7 +118,7 @@ def main() -> int:
         sys.executable,
         "execute_binary_with_io.py",
         str(BIN_FILE),
-        str(DEVICES_FILE),
+        str(devices_file),
     ]
     return run_with_timeout(exec_cmd, args.execute_timeout)
 

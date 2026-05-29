@@ -1,0 +1,76 @@
+[section code]
+CALL main
+POP
+HLT
+print_a:
+PUSH 0
+PUSH 0
+label2:
+PUSH 1
+PUSH 1
+JNZ label1
+SAVE_BP 1
+RET 1
+label1:
+PUSH 1
+PUSH 65
+CALL print
+JMP label2
+print_b:
+PUSH 0
+PUSH 0
+label4:
+PUSH 1
+PUSH 1
+JNZ label3
+SAVE_BP 1
+RET 1
+label3:
+PUSH 1
+PUSH 66
+CALL print
+JMP label4
+main:
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+PUSH 0
+CALL threadingInit
+PUSH 1
+PUSH 1
+CALL setThreadQuantumOps
+SAVE_BP 3
+PUSH 1
+PUSH 2
+CALL setThreadQuantumTicks
+SAVE_BP 5
+PUSH 1
+PUSH 1
+CALL setupEntropyTimer
+SAVE_BP 7
+PUSH 1
+PUSH 0
+LOAD_BP 9
+CALL spawnThread
+PUSH 1
+PUSH 1
+LOAD_BP 11
+CALL spawnThread
+label6:
+PUSH 1
+PUSH 1
+JNZ label5
+SAVE_BP 1
+RET 0
+label5:
+PUSH 1
+PUSH 0
+JMP label6
