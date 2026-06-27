@@ -4,7 +4,7 @@
 
 - два алгоритма планирования по варианту: `RR(2)` и `SRT`
 - сбор метрик `avg_wait` и `avg_turnaround`
-- таймерное вытеснение/переключение контекста (по аналогии с `spo2_lab1_example/sys`)
+- таймерное вытеснение/переключение контекста
 
 ## Где что реализовано
 
@@ -107,24 +107,3 @@ cp output_new/listing.osm spo2_lab1/minimal_timer_aabb.generated.asm
 python3 scripts/build_txt_to_asm.py spo2_lab1/minimal_timer_abab.txt spo2_lab1/minimal_timer_abab.generated.asm
 python3 scripts/build_txt_to_asm.py spo2_lab1/minimal_timer_aabb.txt spo2_lab1/minimal_timer_aabb.generated.asm
 ```
-
-Важный момент: `*.generated.asm` — это результат твоего frontend-компилятора (`SYSSOFT`) в стековом формате.
-Они используются как промежуточный артефакт генерации. Для демонстрации таймерного переключения в этом каталоге используй готовые
-`minimal_timer_abab.asm` и `minimal_timer_aabb.asm`, где логика переключения полностью находится внутри asm.
-
-## Что показывать преподавателю
-
-1. Таймер и контекст:
-   показать `setThreadQuantumTicks`, `threadInterruptPoint`, `setupSchedulerInterrupts` в `vm_runtime.asm`.
-2. Алгоритмы:
-   показать `run_rr` и `run_srt` в `scheduler.asm`.
-3. Данные:
-   показать 20 пар и проверку ограничений варианта.
-4. Результат:
-   показать метрики RR/SRT и вывод `PREFERRED=SRT` по критерию минимального среднего ожидания.
-5. Минимальная демонстрация таймерного вытеснения:
-   запустить `minimal_timer_abab.asm` и `minimal_timer_aabb.asm`, показать разницу шаблонов вывода.
-
-## Важная ремарка для защиты
-
-`vm_two_threads.asm` даёт итоговое сравнение метрик RR/SRT по варианту, а `vm_two_threads_live_cycles.txt` демонстрирует именно таймерное вытеснение и переключение контекста в многопоточной среде.
